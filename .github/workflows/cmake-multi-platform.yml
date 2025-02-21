@@ -4,10 +4,10 @@ name: CMake
 
 on:
   workflow_dispatch:
-  #push:
-  #  branches: [ "main" ]
-  #pull_request:
-  #  branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
-      fail-fast: false
+      fail-fast: true
 
       # Set up a matrix to run the following 3 configurations:
       # 1. <Windows, Release, latest MSVC compiler toolchain on the default runner image, default generator>
@@ -87,26 +87,29 @@ jobs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
-        mkdir $RUNNER_TEMP/bin
-        cp ${{ steps.strings.outputs.build-output-dir }}/c7zip-sample $RUNNER_TEMP/bin
-        mkdir $RUNNER_TEMP/lib
-        cp ${{ steps.strings.outputs.build-output-dir }}/lib7zip.a $RUNNER_TEMP/lib
-        cp ${{ steps.strings.outputs.build-output-dir }}/libc7zip.so $RUNNER_TEMP/lib
+        ls -R ${{ steps.strings.outputs.build-output-dir }}
+        mkdir $RUNNER_TEMP/upload
+        mkdir $RUNNER_TEMP/upload/bin
+        cp ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.build_type }}/c7zip-sample $RUNNER_TEMP/upload/bin
+        mkdir $RUNNER_TEMP/upload/lib
+        cp ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.build_type }}/lib7zip.a $RUNNER_TEMP/upload/lib
+        cp ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.build_type }}/libc7zip.so $RUNNER_TEMP/upload/lib
       
     - name: Prepare Windows upload artifact
       if: runner.os == 'Windows'
       shell: pwsh
       run: |
-        New-Item -Path "$env:RUNNER_TEMP" -Name "bin" -ItemType "directory"
-        Copy-Item "${{ steps.strings.outputs.build-output-dir }}\${{ matrix.build_type }}\c7zip-sample.exe" -Destination "$env:RUNNER_TEMP\bin"
-        New-Item -Path "$env:RUNNER_TEMP" -Name "lib" -ItemType "directory"
-        Copy-Item "${{ steps.strings.outputs.build-output-dir }}\${{ matrix.build_type }}\c7zip.lib" -Destination "$env:RUNNER_TEMP\lib"
-        Copy-Item "${{ steps.strings.outputs.build-output-dir }}\${{ matrix.build_type }}\c7zip.dll" -Destination "$env:RUNNER_TEMP\lib"
+        New-Item -Path "$env:RUNNER_TEMP" -Name "upload" -ItemType "directory"
+        New-Item -Path "$env:RUNNER_TEMP\upload" -Name "bin" -ItemType "directory"
+        Copy-Item "${{ steps.strings.outputs.build-output-dir }}\${{ matrix.build_type }}\c7zip-sample.exe" -Destination "$env:RUNNER_TEMP\upload\bin"
+        New-Item -Path "$env:RUNNER_TEMP\upload" -Name "lib" -ItemType "directory"
+        Copy-Item "${{ steps.strings.outputs.build-output-dir }}\${{ matrix.build_type }}\c7zip.lib" -Destination "$env:RUNNER_TEMP\upload\lib"
+        Copy-Item "${{ steps.strings.outputs.build-output-dir }}\${{ matrix.build_type }}\c7zip.dll" -Destination "$env:RUNNER_TEMP\upload\lib"
     
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ github.event.repository.name }}-${{ runner.os }}-${{ matrix.c_compiler }}
-        path: ${{ runner.temp }}
+        path: ${{ runner.temp }}/upload
         if-no-files-found: error
         retention-days: 1
