@@ -46,6 +46,13 @@ jobs:
             c_compiler: cl
 
     steps:
+    - name: Disable Strawberry Perl on Windows on PATH by renaming directory
+      if: runner.os == "Windows"
+      shell: pwsh
+      run: |
+        Rename-Item -Path "C:\Strawberry" -NewName "_No_Strawberry_"
+        Get-Command "patch" -All | Format-Table CommandType, Name, Definition
+      
     - uses: actions/checkout@v4
 
     - name: Set reusable strings
