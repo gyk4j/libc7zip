@@ -87,13 +87,14 @@ jobs:
       if: runner.os == 'Linux'
       shell: bash
       run: |
-        ls -R ${{ steps.strings.outputs.build-output-dir }}
+        ls -l ${{ steps.strings.outputs.build-output-dir }}
+        ls -l ${{ steps.strings.outputs.build-output-dir }}/vendor/lib7zip/Lib7Zip
         mkdir $RUNNER_TEMP/upload
         mkdir $RUNNER_TEMP/upload/bin
-        cp ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.build_type }}/c7zip-sample $RUNNER_TEMP/upload/bin
+        cp ${{ steps.strings.outputs.build-output-dir }}/c7zip-sample $RUNNER_TEMP/upload/bin
         mkdir $RUNNER_TEMP/upload/lib
-        cp ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.build_type }}/lib7zip.a $RUNNER_TEMP/upload/lib
-        cp ${{ steps.strings.outputs.build-output-dir }}/${{ matrix.build_type }}/libc7zip.so $RUNNER_TEMP/upload/lib
+        cp ${{ steps.strings.outputs.build-output-dir }}/vendor/lib7zip/Lib7Zip/lib7zip.a $RUNNER_TEMP/upload/lib
+        cp ${{ steps.strings.outputs.build-output-dir }}/libc7zip.so $RUNNER_TEMP/upload/lib
       
     - name: Prepare Windows upload artifact
       if: runner.os == 'Windows'
