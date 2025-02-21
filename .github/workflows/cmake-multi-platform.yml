@@ -47,7 +47,7 @@ jobs:
 
     steps:
     - name: Disable Strawberry Perl on Windows on PATH by renaming directory
-      if: runner.os == "Windows"
+      if: ${{ runner.os == "Windows" }}
       shell: pwsh
       run: |
         Rename-Item -Path "C:\Strawberry" -NewName "_No_Strawberry_"
