@@ -82,3 +82,31 @@ jobs:
       # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest --build-config ${{ matrix.build_type }}
+      
+    - name: Prepare Linux upload artifact
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        mkdir $RUNNER_TEMP/bin
+        cp ${{ steps.strings.outputs.build-output-dir }}/c7zip-sample $RUNNER_TEMP/bin
+        mkdir $RUNNER_TEMP/lib
+        cp ${{ steps.strings.outputs.build-output-dir }}/lib7zip.a $RUNNER_TEMP/lib
+        cp ${{ steps.strings.outputs.build-output-dir }}/libc7zip.so $RUNNER_TEMP/lib
+      
+    - name: Prepare Windows upload artifact
+      if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        New-Item -Path "$env:RUNNER_TEMP" -Name "bin" -ItemType "directory"
+        Copy-Item "${{ steps.strings.outputs.build-output-dir }}\${{ matrix.build_type }}\c7zip-sample.exe" -Destination "$env:RUNNER_TEMP\bin"
+        New-Item -Path "$env:RUNNER_TEMP" -Name "lib" -ItemType "directory"
+        Copy-Item "${{ steps.strings.outputs.build-output-dir }}\${{ matrix.build_type }}\c7zip.lib" -Destination "$env:RUNNER_TEMP\lib"
+        Copy-Item "${{ steps.strings.outputs.build-output-dir }}\${{ matrix.build_type }}\c7zip.dll" -Destination "$env:RUNNER_TEMP\lib"
+    
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}-${{ runner.os }}-${{ matrix.c_compiler }}
+        path: ${{ runner.temp }}
+        if-no-files-found: error
+        retention-days: 1
