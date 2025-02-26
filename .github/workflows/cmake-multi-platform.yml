@@ -72,14 +72,14 @@ jobs:
       run: |
         echo 'GENERATOR=Unix Makefiles' >> $GITHUB_ENV
         echo 'ARCH_OPTS=-DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32' >> $GITHUB_ENV
-        echo 'CONFIG_OPTS=-DCMAKE_BUILD_TYPE=${{ matrix.build_type }}' >> $GITHUB_ENV
+        echo 'CONFIG_OPTS=' >> $GITHUB_ENV
       
     - name: Set Linux 64-bit opts
       if: ${{ (runner.os == 'Linux') && (matrix.arch == 'x64') }}
       run: |
         echo 'GENERATOR=Unix Makefiles' >> $GITHUB_ENV
         echo 'ARCH_OPTS=-DCMAKE_C_FLAGS=-m64 -DCMAKE_CXX_FLAGS=-m64' >> $GITHUB_ENV
-        echo 'CONFIG_OPTS=-DCMAKE_BUILD_TYPE=${{ matrix.build_type }}' >> $GITHUB_ENV
+        echo 'CONFIG_OPTS=' >> $GITHUB_ENV
       
     - name: Set Windows 32-bit opts
       if: ${{ (runner.os == 'Windows') && (matrix.arch == 'x86') }}
@@ -112,7 +112,6 @@ jobs:
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} 
         -G "$env:GENERATOR" 
         $env:ARCH_OPTS 
-        $env:CONFIG_OPTS 
         -Wno-dev
         -S ${{ github.workspace }}
         -B ${{ steps.strings.outputs.build-output-dir }}
