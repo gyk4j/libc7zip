@@ -119,7 +119,7 @@ jobs:
     - name: Build Linux
       if: runner.os == 'Linux'
       # Build your program with the given configuration. Visual Studio-specific --config is dropped. 
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }}
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} $env:ARCH_OPTS
 
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
