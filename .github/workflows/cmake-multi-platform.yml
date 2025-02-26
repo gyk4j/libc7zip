@@ -87,10 +87,6 @@ jobs:
     - name: Set Windows 64-bit opts
       if: ${{ (runner.os == 'Windows') && (matrix.arch == '64') }}
       run: echo 'ARCH_OPTS=-A x64' >> $env:GITHUB_ENV
-      
-    - name: Debug ARCH_OPTS
-      run: echo "ARCH_OPTS: $env:ARCH_OPTS"
-      shell: pwsh
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
