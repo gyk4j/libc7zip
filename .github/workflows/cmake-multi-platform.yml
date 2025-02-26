@@ -82,11 +82,11 @@ jobs:
         
     - name: Set Linux 32-bit opts
       if: ${{ (runner.os == 'Linux') && (matrix.arch == '32') }}
-      run: echo 'ARCH_OPTS=-DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32' >> $GITHUB_ENV
+      run: echo 'ARCH_OPTS=-DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32 -DCMAKE_EXE_LINKER_FLAGS=-m32' >> $GITHUB_ENV
       
     - name: Set Linux 64-bit opts
       if: ${{ (runner.os == 'Linux') && (matrix.arch == '64') }}
-      run: echo 'ARCH_OPTS=-DCMAKE_C_FLAGS=-m64 -DCMAKE_CXX_FLAGS=-m64' >> $GITHUB_ENV
+      run: echo 'ARCH_OPTS=-DCMAKE_C_FLAGS=-m64 -DCMAKE_CXX_FLAGS=-m64 -DCMAKE_EXE_LINKER_FLAGS=-m64' >> $GITHUB_ENV
       
     - name: Set Windows 32-bit opts
       if: ${{ (runner.os == 'Windows') && (matrix.arch == '32') }}
