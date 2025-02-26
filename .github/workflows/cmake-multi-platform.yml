@@ -91,9 +91,11 @@ jobs:
         echo 'ARCH_OPTS=-G "Visual Studio 17 2022" -A x64' >> $GITHUB_ENV
         echo "CONFIG_OPTS=--config ${{ matrix.build_type }}" >> $GITHUB_ENV
       
-    - name: Debug ARCH_OPTS
-      run: echo ARCH_OPTS=${{ env.ARCH_OPTS }}
-      shell: bash
+    - name: Debug ARCH_OPTS and CONFIG_OPTS
+      run: |
+        echo "ARCH_OPTS=$env:ARCH_OPTS"
+        echo "CONFIG_OPTS=$env:CONFIG_OPTS"
+      shell: pwsh
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
@@ -103,17 +105,17 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        ${{ env.ARCH_OPTS }} 
-        ${{ env.CONFIG_OPTS }} 
+        $env:ARCH_OPTS 
+        $env:CONFIG_OPTS 
         -Wno-dev
         -S ${{ github.workspace }}
         -B ${{ steps.strings.outputs.build-output-dir }}
-      shell: bash
+      shell: pwsh
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} ${{ env.CONFIG_OPTS }}
-      shell: bash
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} $env:CONFIG_OPTS
+      shell: pwsh
       
       #--config ${{ matrix.build_type }}
 
