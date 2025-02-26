@@ -70,25 +70,25 @@ jobs:
     - name: Set Linux 32-bit opts
       if: ${{ (runner.os == 'Linux') && (matrix.arch == 'x86') }}
       run: |
-        echo "ARCH_OPTS=-G \"Unix Makefiles\" -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32" >> $GITHUB_ENV
-        echo "CONFIG_OPTS=" >> $GITHUB_ENV
+        echo 'ARCH_OPTS=-G "Unix Makefiles" -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32' >> $GITHUB_ENV
+        echo 'CONFIG_OPTS=' >> $GITHUB_ENV
       
     - name: Set Linux 64-bit opts
       if: ${{ (runner.os == 'Linux') && (matrix.arch == 'x64') }}
       run: |
-        echo "ARCH_OPTS=-G \"Unix Makefiles\" -DCMAKE_C_FLAGS=-m64 -DCMAKE_CXX_FLAGS=-m64" >> $GITHUB_ENV
-        echo "CONFIG_OPTS=" >> $GITHUB_ENV
+        echo 'ARCH_OPTS=-G "Unix Makefiles" -DCMAKE_C_FLAGS=-m64 -DCMAKE_CXX_FLAGS=-m64' >> $GITHUB_ENV
+        echo 'CONFIG_OPTS=' >> $GITHUB_ENV
       
     - name: Set Windows 32-bit opts
       if: ${{ (runner.os == 'Windows') && (matrix.arch == 'x86') }}
       run: |
-        echo "ARCH_OPTS=-G \"Visual Studio 17 2022\" -A Win32" >> $GITHUB_ENV
+        echo 'ARCH_OPTS=-G "Visual Studio 17 2022" -A Win32' >> $GITHUB_ENV
         echo "CONFIG_OPTS=--config ${{ matrix.build_type }}" >> $GITHUB_ENV
       
     - name: Set Windows 64-bit opts
       if: ${{ (runner.os == 'Windows') && (matrix.arch == 'x64') }}
       run: |
-        echo "ARCH_OPTS=-G \"Visual Studio 17 2022\" -A x64" >> $GITHUB_ENV
+        echo 'ARCH_OPTS=-G "Visual Studio 17 2022" -A x64' >> $GITHUB_ENV
         echo "CONFIG_OPTS=--config ${{ matrix.build_type }}" >> $GITHUB_ENV
       
     - name: Debug ARCH_OPTS
@@ -110,10 +110,7 @@ jobs:
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-      run: >
-        cmake 
-        -Wno-dev 
-        --build ${{ steps.strings.outputs.build-output-dir }} 
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} ${{ env.CONFIG_OPTS }}
       
       #--config ${{ matrix.build_type }}
 
