@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
-      fail-fast: true
+      fail-fast: false
 
       # Set up a matrix to run the following 3 configurations:
       # 1. <Windows, Release, latest MSVC compiler toolchain on the default runner image, default generator>
@@ -25,8 +25,9 @@ jobs:
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
         os: [ubuntu-latest, windows-latest]
+        arch: [x86, x64]
         build_type: [Release]
-        c_compiler: [gcc, clang, cl]
+        c_compiler: [gcc, cl] #clang, 
         include:
           - os: windows-latest
             c_compiler: cl
@@ -34,24 +35,28 @@ jobs:
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
-          - os: ubuntu-latest
-            c_compiler: clang
-            cpp_compiler: clang++
+          #- os: ubuntu-latest
+          #  c_compiler: clang
+          #  cpp_compiler: clang++
         exclude:
           - os: windows-latest
             c_compiler: gcc
-          - os: windows-latest
-            c_compiler: clang
+          #- os: windows-latest
+          #  c_compiler: clang
           - os: ubuntu-latest
             c_compiler: cl
 
     steps:
     - name: Disable Strawberry Perl on Windows on PATH by renaming directory
-      if: ${{ runner.os == 'Windows' }}
+      if: runner.os == 'Windows'
       shell: pwsh
       run: |
         Rename-Item -Path "C:\Strawberry" -NewName "_No_Strawberry_"
         Get-Command "patch" -All | Format-Table CommandType, Name, Definition
+        
+    - name: Install gcc-multilib on Linux
+      if: runner.os == 'Linux'
+      run: sudo apt-get update -y && sudo apt-get install -y gcc-multilib
       
     - uses: actions/checkout@v4
 
@@ -61,21 +66,46 @@ jobs:
       shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        
+    - name: Set Linux 32-bit opts
+      if: ${{ (runner.os == 'Linux') && (matrix.arch == 'x86') }}
+      run: echo "ARCH_OPTS=-G \"Unix Makefiles\" -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32" >> $GITHUB_ENV
+      
+    - name: Set Linux 64-bit opts
+      if: ${{ (runner.os == 'Linux') && (matrix.arch == 'x64') }}
+      run: echo "ARCH_OPTS=-G \"Unix Makefiles\" -DCMAKE_C_FLAGS=-m64 -DCMAKE_CXX_FLAGS=-m64" >> $GITHUB_ENV
+      
+    - name: Set Windows 32-bit opts
+      if: ${{ (runner.os == 'Windows') && (matrix.arch == 'x86') }}
+      run: echo "ARCH_OPTS=-G \"Visual Studio 17 2022\" -A Win32" >> $GITHUB_ENV
+      
+    - name: Set Windows 64-bit opts
+      if: ${{ (runner.os == 'Windows') && (matrix.arch == 'x64') }}
+      run: echo "ARCH_OPTS=-G \"Visual Studio 17 2022\" -A x64" >> $GITHUB_ENV
+      
+    - name: Debug ARCH_OPTS
+      run: echo ARCH_OPTS=${{ env.ARCH_OPTS }}
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: >
-        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        cmake 
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -S ${{ github.workspace }}
+        ${{ env.ARCH_OPTS }}
         -Wno-dev
+        -S ${{ github.workspace }}
+        -B ${{ steps.strings.outputs.build-output-dir }}
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+      run: >
+        cmake 
+        -Wno-dev 
+        --build ${{ steps.strings.outputs.build-output-dir }} 
+        --config ${{ matrix.build_type }}
 
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
