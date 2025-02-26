@@ -69,19 +69,27 @@ jobs:
         
     - name: Set Linux 32-bit opts
       if: ${{ (runner.os == 'Linux') && (matrix.arch == 'x86') }}
-      run: echo "ARCH_OPTS=-G \"Unix Makefiles\" -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32" >> $GITHUB_ENV
+      run: |
+        echo "ARCH_OPTS=-G \"Unix Makefiles\" -DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32" >> $GITHUB_ENV
+        echo "CONFIG_OPTS=" >> $GITHUB_ENV
       
     - name: Set Linux 64-bit opts
       if: ${{ (runner.os == 'Linux') && (matrix.arch == 'x64') }}
-      run: echo "ARCH_OPTS=-G \"Unix Makefiles\" -DCMAKE_C_FLAGS=-m64 -DCMAKE_CXX_FLAGS=-m64" >> $GITHUB_ENV
+      run: |
+        echo "ARCH_OPTS=-G \"Unix Makefiles\" -DCMAKE_C_FLAGS=-m64 -DCMAKE_CXX_FLAGS=-m64" >> $GITHUB_ENV
+        echo "CONFIG_OPTS=" >> $GITHUB_ENV
       
     - name: Set Windows 32-bit opts
       if: ${{ (runner.os == 'Windows') && (matrix.arch == 'x86') }}
-      run: echo "ARCH_OPTS=-G \"Visual Studio 17 2022\" -A Win32" >> $GITHUB_ENV
+      run: |
+        echo "ARCH_OPTS=-G \"Visual Studio 17 2022\" -A Win32" >> $GITHUB_ENV
+        echo "CONFIG_OPTS=--config ${{ matrix.build_type }}" >> $GITHUB_ENV
       
     - name: Set Windows 64-bit opts
       if: ${{ (runner.os == 'Windows') && (matrix.arch == 'x64') }}
-      run: echo "ARCH_OPTS=-G \"Visual Studio 17 2022\" -A x64" >> $GITHUB_ENV
+      run: |
+        echo "ARCH_OPTS=-G \"Visual Studio 17 2022\" -A x64" >> $GITHUB_ENV
+        echo "CONFIG_OPTS=--config ${{ matrix.build_type }}" >> $GITHUB_ENV
       
     - name: Debug ARCH_OPTS
       run: echo ARCH_OPTS=${{ env.ARCH_OPTS }}
@@ -94,7 +102,8 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        ${{ env.ARCH_OPTS }}
+        ${{ env.ARCH_OPTS }} 
+        ${{ env.CONFIG_OPTS }} 
         -Wno-dev
         -S ${{ github.workspace }}
         -B ${{ steps.strings.outputs.build-output-dir }}
@@ -105,7 +114,8 @@ jobs:
         cmake 
         -Wno-dev 
         --build ${{ steps.strings.outputs.build-output-dir }} 
-        --config ${{ matrix.build_type }}
+      
+      #--config ${{ matrix.build_type }}
 
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
