@@ -84,14 +84,14 @@ jobs:
     - name: Set Windows 32-bit opts
       if: ${{ (runner.os == 'Windows') && (matrix.arch == 'x86') }}
       run: |
-        echo 'GENERATOR=Visual Studio 17 2022' >> $env:$GITHUB_ENV
+        echo 'GENERATOR=Visual Studio 17 2022' >> $env:GITHUB_ENV
         echo 'ARCH_OPTS=-A Win32' >> $env:GITHUB_ENV
         echo "CONFIG_OPTS=--config ${{ matrix.build_type }}" >> $env:GITHUB_ENV
       
     - name: Set Windows 64-bit opts
       if: ${{ (runner.os == 'Windows') && (matrix.arch == 'x64') }}
       run: |
-        echo 'GENERATOR=Visual Studio 17 2022' >> $env:$GITHUB_ENV
+        echo 'GENERATOR=Visual Studio 17 2022' >> $env:GITHUB_ENV
         echo 'ARCH_OPTS=-A x64' >> $env:GITHUB_ENV
         echo "CONFIG_OPTS=--config ${{ matrix.build_type }}" >> $env:GITHUB_ENV
       
