@@ -45,8 +45,14 @@ jobs:
           - os: windows-latest
             generator: 'Unix Makefiles'
             c_compiler: gcc
+          - os: windows-latest
+            generator: 'Unix Makefiles'
+            c_compiler: cl
           #- os: windows-latest
           #  c_compiler: clang
+          - os: ubuntu-latest
+            generator: 'Visual Studio 17 2022'
+            c_compiler: gcc
           - os: ubuntu-latest
             generator: 'Visual Studio 17 2022'
             c_compiler: cl
