@@ -25,14 +25,17 @@ jobs:
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
         os: [ubuntu-latest, windows-latest]
-        arch: [x86, x64]
+        arch: [32, 64]
         build_type: [Release]
+        generator: ['Unix Makefiles', 'Visual Studio 17 2022']
         c_compiler: [gcc, cl] #clang, 
         include:
           - os: windows-latest
+            generator: 'Visual Studio 17 2022'
             c_compiler: cl
             cpp_compiler: cl
           - os: ubuntu-latest
+            generator: 'Unix Makefiles'
             c_compiler: gcc
             cpp_compiler: g++
           #- os: ubuntu-latest
@@ -40,10 +43,12 @@ jobs:
           #  cpp_compiler: clang++
         exclude:
           - os: windows-latest
+            generator: 'Unix Makefiles'
             c_compiler: gcc
           #- os: windows-latest
           #  c_compiler: clang
           - os: ubuntu-latest
+            generator: 'Visual Studio 17 2022'
             c_compiler: cl
 
     steps:
@@ -68,38 +73,23 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         
     - name: Set Linux 32-bit opts
-      if: ${{ (runner.os == 'Linux') && (matrix.arch == 'x86') }}
-      run: |
-        echo 'GENERATOR=Unix Makefiles' >> $GITHUB_ENV
-        echo 'ARCH_OPTS=-DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32' >> $GITHUB_ENV
-        echo 'CONFIG_OPTS=' >> $GITHUB_ENV
+      if: ${{ (runner.os == 'Linux') && (matrix.arch == '32') }}
+      run: echo 'ARCH_OPTS=-DCMAKE_C_FLAGS=-m32 -DCMAKE_CXX_FLAGS=-m32' >> $GITHUB_ENV
       
     - name: Set Linux 64-bit opts
-      if: ${{ (runner.os == 'Linux') && (matrix.arch == 'x64') }}
-      run: |
-        echo 'GENERATOR=Unix Makefiles' >> $GITHUB_ENV
-        echo 'ARCH_OPTS=-DCMAKE_C_FLAGS=-m64 -DCMAKE_CXX_FLAGS=-m64' >> $GITHUB_ENV
-        echo 'CONFIG_OPTS=' >> $GITHUB_ENV
+      if: ${{ (runner.os == 'Linux') && (matrix.arch == '64') }}
+      run: echo 'ARCH_OPTS=-DCMAKE_C_FLAGS=-m64 -DCMAKE_CXX_FLAGS=-m64' >> $GITHUB_ENV
       
     - name: Set Windows 32-bit opts
-      if: ${{ (runner.os == 'Windows') && (matrix.arch == 'x86') }}
-      run: |
-        echo 'GENERATOR=Visual Studio 17 2022' >> $env:GITHUB_ENV
-        echo 'ARCH_OPTS=-A Win32' >> $env:GITHUB_ENV
-        echo "CONFIG_OPTS=--config ${{ matrix.build_type }}" >> $env:GITHUB_ENV
+      if: ${{ (runner.os == 'Windows') && (matrix.arch == '32') }}
+      run: echo 'ARCH_OPTS=-A Win32' >> $env:GITHUB_ENV
       
     - name: Set Windows 64-bit opts
-      if: ${{ (runner.os == 'Windows') && (matrix.arch == 'x64') }}
-      run: |
-        echo 'GENERATOR=Visual Studio 17 2022' >> $env:GITHUB_ENV
-        echo 'ARCH_OPTS=-A x64' >> $env:GITHUB_ENV
-        echo "CONFIG_OPTS=--config ${{ matrix.build_type }}" >> $env:GITHUB_ENV
+      if: ${{ (runner.os == 'Windows') && (matrix.arch == '64') }}
+      run: echo 'ARCH_OPTS=-A x64' >> $env:GITHUB_ENV
       
-    - name: Debug ARCH_OPTS and CONFIG_OPTS
-      run: |
-        echo "GENERATOR: $env:GENERATOR"
-        echo "ARCH_OPTS: $env:ARCH_OPTS"
-        echo "CONFIG_OPTS: $env:CONFIG_OPTS"
+    - name: Debug ARCH_OPTS
+      run: echo "ARCH_OPTS: $env:ARCH_OPTS"
       shell: pwsh
 
     - name: Configure CMake
@@ -110,19 +100,22 @@ jobs:
         -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} 
-        -G "$env:GENERATOR" 
+        -G "${{ matrix.generator }}" 
         $env:ARCH_OPTS 
         -Wno-dev
         -S ${{ github.workspace }}
         -B ${{ steps.strings.outputs.build-output-dir }}
       shell: pwsh
 
-    - name: Build
+    - name: Build Windows
+      if: runner.os == 'Windows'
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} $env:CONFIG_OPTS
-      shell: pwsh
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
       
-      #--config ${{ matrix.build_type }}
+    - name: Build Linux
+      if: runner.os == 'Linux'
+      # Build your program with the given configuration. Visual Studio-specific --config is dropped. 
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }}
 
     - name: Test
       working-directory: ${{ steps.strings.outputs.build-output-dir }}
@@ -157,7 +150,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.repository.name }}-${{ runner.os }}-${{ matrix.c_compiler }}
+        name: ${{ github.event.repository.name }}-${{ runner.os }}-${{ matrix.arch }}
         path: ${{ runner.temp }}/upload
         if-no-files-found: error
         retention-days: 1
