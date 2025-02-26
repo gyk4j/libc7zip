@@ -82,14 +82,14 @@ jobs:
     - name: Set Windows 32-bit opts
       if: ${{ (runner.os == 'Windows') && (matrix.arch == 'x86') }}
       run: |
-        echo 'ARCH_OPTS=-G "Visual Studio 17 2022" -A Win32' >> $GITHUB_ENV
-        echo "CONFIG_OPTS=--config ${{ matrix.build_type }}" >> $GITHUB_ENV
+        echo 'ARCH_OPTS=-G "Visual Studio 17 2022" -A Win32' >> $env:GITHUB_ENV
+        echo "CONFIG_OPTS=--config ${{ matrix.build_type }}" >> $env:GITHUB_ENV
       
     - name: Set Windows 64-bit opts
       if: ${{ (runner.os == 'Windows') && (matrix.arch == 'x64') }}
       run: |
-        echo 'ARCH_OPTS=-G "Visual Studio 17 2022" -A x64' >> $GITHUB_ENV
-        echo "CONFIG_OPTS=--config ${{ matrix.build_type }}" >> $GITHUB_ENV
+        echo 'ARCH_OPTS=-G "Visual Studio 17 2022" -A x64' >> $env:GITHUB_ENV
+        echo "CONFIG_OPTS=--config ${{ matrix.build_type }}" >> $env:GITHUB_ENV
       
     - name: Debug ARCH_OPTS and CONFIG_OPTS
       run: |
