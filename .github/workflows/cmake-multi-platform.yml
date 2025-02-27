@@ -75,7 +75,6 @@ jobs:
       if: runner.os == 'Linux'
       run: |
         echo $LD_LIBRARY_PATH
-        find / -name libgcc.a 2> /dev/null
         gcc --version
         g++ --version
       
