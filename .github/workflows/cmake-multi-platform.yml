@@ -24,40 +24,40 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest] #, windows-latest
         arch: [32, 64]
         build_type: [Release]
-        generator: ['Unix Makefiles', 'Visual Studio 17 2022']
-        c_compiler: [gcc, cl] #clang, 
+        generator: ['Unix Makefiles'] #, 'Visual Studio 17 2022'
+        c_compiler: [gcc] #, cl 
         include:
-          - os: windows-latest
-            generator: 'Visual Studio 17 2022'
-            c_compiler: cl
-            cpp_compiler: cl
+          # - os: windows-latest
+            # generator: 'Visual Studio 17 2022'
+            # c_compiler: cl
+            # cpp_compiler: cl
           - os: ubuntu-latest
             generator: 'Unix Makefiles'
             c_compiler: gcc
             cpp_compiler: g++
          
-        exclude:
-          - os: windows-latest
-            generator: 'Unix Makefiles'
-            c_compiler: gcc
-          - os: windows-latest
-            generator: 'Unix Makefiles'
-            c_compiler: cl
-          - os: windows-latest
-            generator: 'Visual Studio 17 2022'
-            c_compiler: gcc
-          - os: ubuntu-latest
-            generator: 'Visual Studio 17 2022'
-            c_compiler: cl
-          - os: ubuntu-latest
-            generator: 'Visual Studio 17 2022'
-            c_compiler: gcc
-          - os: ubuntu-latest
-            generator: 'Unix Makefiles'
-            c_compiler: cl
+        # exclude:
+          # - os: windows-latest
+            # generator: 'Unix Makefiles'
+            # c_compiler: gcc
+          # - os: windows-latest
+            # generator: 'Unix Makefiles'
+            # c_compiler: cl
+          # - os: windows-latest
+            # generator: 'Visual Studio 17 2022'
+            # c_compiler: gcc
+          # - os: ubuntu-latest
+            # generator: 'Visual Studio 17 2022'
+            # c_compiler: cl
+          # - os: ubuntu-latest
+            # generator: 'Visual Studio 17 2022'
+            # c_compiler: gcc
+          # - os: ubuntu-latest
+            # generator: 'Unix Makefiles'
+            # c_compiler: cl
 
     steps:
     - name: Disable Strawberry Perl on Windows on PATH by renaming directory
@@ -69,13 +69,15 @@ jobs:
         
     - name: Install gcc-multilib on Linux
       if: runner.os == 'Linux'
-      run: sudo apt-get update -y && sudo apt-get install -y build-essential gcc-multilib g++-multilib lib32gcc-7-dev
+      run: sudo apt-get update -y && sudo apt-get install -y build-essential gcc-multilib g++-multilib lib32gcc-s1-amd64-cross lib32gcc-s1-x32-cross
       
     - name: Debug paths
       if: runner.os == 'Linux'
       run: |
         echo $LD_LIBRARY_PATH
         find / -name libgcc.a 2> /dev/null
+        gcc --version
+        g++ --version
       
     - uses: actions/checkout@v4
 
