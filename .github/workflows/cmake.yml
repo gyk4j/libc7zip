@@ -27,11 +27,12 @@ jobs:
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
+      shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         echo "exe=${{ github.workspace }}/build${{ runner.os == 'Linux' && '/c7zip-sample' || '\Release\c7zip-sample.exe' }}" >> "$GITHUB_OUTPUT"
         echo "shared=${{ github.workspace }}/build${{ runner.os == 'Linux' && '/libc7zip.so' || '\Release\c7zip.dll' }}" >> "$GITHUB_OUTPUT"
-        echo "static=${{ github.workspace }}/build${{ runner.os == 'Linux' && '/vendor/lib7zip/Lib7Zip/libc7zip.a' || '\Release\vendor\lib7zip\Lib7Zip\c7zip.lib' }}" >> "$GITHUB_OUTPUT"
+        echo "static=${{ github.workspace }}/build${{ runner.os == 'Linux' && '/vendor/lib7zip/Lib7Zip/lib7zip.a' || '\Release\vendor\lib7zip\Lib7Zip\7zip.lib' }}" >> "$GITHUB_OUTPUT"
         
     - name: Install packages (Linux)
       if: runner.os == 'Linux'
