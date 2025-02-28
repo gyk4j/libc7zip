@@ -27,9 +27,11 @@ jobs:
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
-      shell: bash
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        echo "exe=${{ steps.strings.outputs.build-output-dir }}${{ runner.os == 'Linux' && '/c7zip-sample' || '\Release\c7zip-sample.exe' }}" >> "$GITHUB_OUTPUT"
+        echo "shared=${{ steps.strings.outputs.build-output-dir }}${{ runner.os == 'Linux' && '/libc7zip.so' || '\Release\c7zip.dll' }}" >> "$GITHUB_OUTPUT"
+        echo "static=${{ steps.strings.outputs.build-output-dir }}${{ runner.os == 'Linux' && '/vendor/lib7zip/Lib7Zip/libc7zip.a' || '\Release\vendor\lib7zip\Lib7Zip\c7zip.lib' }}" >> "$GITHUB_OUTPUT"
         
     - name: Install packages (Linux)
       if: runner.os == 'Linux'
@@ -94,12 +96,10 @@ jobs:
         ls -l ${{ steps.strings.outputs.build-output-dir }}/vendor/lib7zip/Lib7Zip
         mkdir $RUNNER_TEMP/upload
         mkdir $RUNNER_TEMP/upload/bin
-        cp ${{ steps.strings.outputs.build-output-dir }}/c7zip-sample* $RUNNER_TEMP/upload/bin
+        cp ${{ steps.strings.outputs.exe }} $RUNNER_TEMP/upload/bin
         mkdir $RUNNER_TEMP/upload/lib
-        cp ${{ steps.strings.outputs.build-output-dir }}/vendor/lib7zip/Lib7Zip/*.a $RUNNER_TEMP/upload/lib
-        cp ${{ steps.strings.outputs.build-output-dir }}/vendor/lib7zip/Lib7Zip/*.lib $RUNNER_TEMP/upload/lib
-        cp ${{ steps.strings.outputs.build-output-dir }}/*.so $RUNNER_TEMP/upload/lib
-        cp ${{ steps.strings.outputs.build-output-dir }}/*.dll $RUNNER_TEMP/upload/lib
+        cp ${{ steps.strings.outputs.static }} $RUNNER_TEMP/upload/lib
+        cp ${{ steps.strings.outputs.shared }} $RUNNER_TEMP/upload/lib
         cp ${{ github.workspace }}/include $RUNNER_TEMP/upload
         cp ${{ github.workspace }}/LICENSE $RUNNER_TEMP/upload
         cp ${{ github.workspace }}/README.md $RUNNER_TEMP/upload
