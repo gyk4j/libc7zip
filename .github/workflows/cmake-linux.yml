@@ -1,0 +1,68 @@
+name: CMake (Linux)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+    
+env:
+  CPP_COMPILER: g++
+  C_COMPILER: gcc
+  BUILD_TYPE: Release
+  GENERATOR: Unix Makefiles
+  ARCH: 32
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Install packages
+      run: sudo apt-get update -y && sudo apt-get install -y build-essential gcc-multilib g++-multilib
+      
+    - uses: actions/checkout@v4
+    
+    - name: Set reusable strings
+      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
+      id: strings
+      shell: bash
+      run: |
+        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        
+    - name: Configure CMake
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: >
+        cmake 
+        -DCMAKE_CXX_COMPILER=$CPP_COMPILER
+        -DCMAKE_C_COMPILER=$C_COMPILER
+        -DCMAKE_BUILD_TYPE=$BUILD_TYPE 
+        -G "$GENERATOR" 
+        -DCMAKE_C_FLAGS=-m$ARCH 
+        -DCMAKE_CXX_FLAGS=-m$ARCH 
+        -Wno-dev
+        -S ${{ github.workspace }}
+        -B ${{ steps.strings.outputs.build-output-dir }}
+        
+    - name: Build
+      run: cmake --build ${{ steps.strings.outputs.build-output-dir }}
+      
+    - name: Prepare upload artifact
+      run: |
+        ls -l ${{ steps.strings.outputs.build-output-dir }}
+        ls -l ${{ steps.strings.outputs.build-output-dir }}/vendor/lib7zip/Lib7Zip
+        mkdir $RUNNER_TEMP/upload
+        mkdir $RUNNER_TEMP/upload/bin
+        cp ${{ steps.strings.outputs.build-output-dir }}/c7zip-sample $RUNNER_TEMP/upload/bin
+        mkdir $RUNNER_TEMP/upload/lib
+        cp ${{ steps.strings.outputs.build-output-dir }}/vendor/lib7zip/Lib7Zip/lib7zip.a $RUNNER_TEMP/upload/lib
+        cp ${{ steps.strings.outputs.build-output-dir }}/libc7zip.so $RUNNER_TEMP/upload/lib
+        
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}-${{ runner.os }}-${{ env.ARCH }}
+        path: ${{ runner.temp }}/upload
+        if-no-files-found: error
+        retention-days: 1
