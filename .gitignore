@@ -1,2 +1,2 @@
-/build
-/broth
+.vagrant/
+libc7zip-*.zip
