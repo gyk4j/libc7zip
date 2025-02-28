@@ -32,7 +32,6 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         echo "exe=${{ github.workspace }}/build${{ runner.os == 'Linux' && '/c7zip-sample' || '\Release\c7zip-sample.exe' }}" >> "$GITHUB_OUTPUT"
         echo "shared=${{ github.workspace }}/build${{ runner.os == 'Linux' && '/libc7zip.so' || '\Release\c7zip.dll' }}" >> "$GITHUB_OUTPUT"
-        echo "static=${{ github.workspace }}/build${{ runner.os == 'Linux' && '/vendor/lib7zip/Lib7Zip/lib7zip.a' || '\Release\vendor\lib7zip\Lib7Zip\7zip.lib' }}" >> "$GITHUB_OUTPUT"
         
     - name: Install packages (Linux)
       if: runner.os == 'Linux'
@@ -99,9 +98,8 @@ jobs:
         mkdir $RUNNER_TEMP/upload/bin
         cp ${{ steps.strings.outputs.exe }} $RUNNER_TEMP/upload/bin
         mkdir $RUNNER_TEMP/upload/lib
-        cp ${{ steps.strings.outputs.static }} $RUNNER_TEMP/upload/lib
         cp ${{ steps.strings.outputs.shared }} $RUNNER_TEMP/upload/lib
-        cp ${{ github.workspace }}/include $RUNNER_TEMP/upload
+        cp -r ${{ github.workspace }}/include $RUNNER_TEMP/upload
         cp ${{ github.workspace }}/LICENSE $RUNNER_TEMP/upload
         cp ${{ github.workspace }}/README.md $RUNNER_TEMP/upload
         
