@@ -12,11 +12,18 @@ env:
   C_COMPILER: gcc
   BUILD_TYPE: Release
   GENERATOR: Unix Makefiles
-  ARCH: 32
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      # Set fail-fast to false to ensure that feedback is delivered for all matrix combinations. Consider changing this to true when your workflow is stable.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        arch: [32, 64]
+    
     steps:
     - name: Install packages
       run: sudo apt-get update -y && sudo apt-get install -y build-essential gcc-multilib g++-multilib
@@ -39,8 +46,8 @@ jobs:
         -DCMAKE_C_COMPILER=$C_COMPILER
         -DCMAKE_BUILD_TYPE=$BUILD_TYPE 
         -G "$GENERATOR" 
-        -DCMAKE_C_FLAGS=-m$ARCH 
-        -DCMAKE_CXX_FLAGS=-m$ARCH 
+        -DCMAKE_C_FLAGS=-m${{ matrix.arch }} 
+        -DCMAKE_CXX_FLAGS=-m${{ matrix.arch }}
         -Wno-dev
         -S ${{ github.workspace }}
         -B ${{ steps.strings.outputs.build-output-dir }}
@@ -62,7 +69,7 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ github.event.repository.name }}-${{ runner.os }}-${{ env.ARCH }}
+        name: ${{ github.event.repository.name }}-${{ runner.os }}-${{ matrix.arch }}
         path: ${{ runner.temp }}/upload
         if-no-files-found: error
         retention-days: 1
