@@ -1,4 +1,4 @@
-name: CMake (Linux)
+name: CMake
 
 on:
   workflow_dispatch:
@@ -96,8 +96,13 @@ jobs:
         mkdir $RUNNER_TEMP/upload/bin
         cp ${{ steps.strings.outputs.build-output-dir }}/c7zip-sample* $RUNNER_TEMP/upload/bin
         mkdir $RUNNER_TEMP/upload/lib
-        cp ${{ steps.strings.outputs.build-output-dir }}/vendor/lib7zip/Lib7Zip/lib7zip.a $RUNNER_TEMP/upload/lib
-        cp ${{ steps.strings.outputs.build-output-dir }}/libc7zip.so $RUNNER_TEMP/upload/lib
+        cp ${{ steps.strings.outputs.build-output-dir }}/vendor/lib7zip/Lib7Zip/*.a $RUNNER_TEMP/upload/lib
+        cp ${{ steps.strings.outputs.build-output-dir }}/vendor/lib7zip/Lib7Zip/*.lib $RUNNER_TEMP/upload/lib
+        cp ${{ steps.strings.outputs.build-output-dir }}/*.so $RUNNER_TEMP/upload/lib
+        cp ${{ steps.strings.outputs.build-output-dir }}/*.dll $RUNNER_TEMP/upload/lib
+        cp ${{ github.workspace }}/include $RUNNER_TEMP/upload
+        cp ${{ github.workspace }}/LICENSE $RUNNER_TEMP/upload
+        cp ${{ github.workspace }}/README.md $RUNNER_TEMP/upload
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
