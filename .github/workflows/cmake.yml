@@ -91,17 +91,21 @@ jobs:
       run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config $env:BUILD_TYPE
       
     - name: Prepare upload artifact
+      # Beware of bash (Linux) vs. pwsh (Windows) when using env variables.
+      # pwsh will return empty string silently when not prefixed with 
+      # $env:VARIABLE
+      # Example: $RUNNER_TEMP (bash) vs $env:RUNNER_TEMP (pwsh)
+      # Use context variable ${{ env.VARIABLE }} or specify `shell: bash` or 
+      # `shell:pwsh` explicitly
       run: |
-        ls -l ${{ steps.strings.outputs.build-output-dir }}
-        ls -l ${{ steps.strings.outputs.build-output-dir }}/vendor/lib7zip/Lib7Zip
-        mkdir $RUNNER_TEMP/upload
-        mkdir $RUNNER_TEMP/upload/bin
-        cp ${{ steps.strings.outputs.exe }} $RUNNER_TEMP/upload/bin
-        mkdir $RUNNER_TEMP/upload/lib
-        cp ${{ steps.strings.outputs.shared }} $RUNNER_TEMP/upload/lib
-        cp -r ${{ github.workspace }}/include $RUNNER_TEMP/upload
-        cp ${{ github.workspace }}/LICENSE $RUNNER_TEMP/upload
-        cp ${{ github.workspace }}/README.md $RUNNER_TEMP/upload
+        mkdir ${{ runner.temp }}/upload
+        mkdir ${{ runner.temp }}/upload/bin
+        cp ${{ steps.strings.outputs.exe }} ${{ runner.temp }}/upload/bin
+        mkdir ${{ runner.temp }}/upload/lib
+        cp ${{ steps.strings.outputs.shared }} ${{ runner.temp }}/upload/lib
+        cp -r ${{ github.workspace }}/include ${{ runner.temp }}/upload
+        cp ${{ github.workspace }}/LICENSE ${{ runner.temp }}/upload
+        cp ${{ github.workspace }}/README.md ${{ runner.temp }}/upload
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
