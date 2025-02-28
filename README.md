@@ -1,6 +1,6 @@
-[![CMake](https://github.com/gyk4j/libc7zip/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/gyk4j/libc7zip/actions/workflows/cmake-multi-platform.yml)
-
 ### Preface and Background
+
+[![CMake](https://github.com/gyk4j/libc7zip/actions/workflows/cmake.yml/badge.svg)](https://github.com/gyk4j/libc7zip/actions/workflows/cmake.yml)
 
 I originally wanted to use [7-Zip](https://www.7-zip.org) with a 
 [Go](https://go.dev) app. Thus, I stumbled upon the 

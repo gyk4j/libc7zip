@@ -32,6 +32,7 @@ jobs:
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
         echo "exe=${{ github.workspace }}/build${{ runner.os == 'Linux' && '/c7zip-sample' || '\Release\c7zip-sample.exe' }}" >> "$GITHUB_OUTPUT"
         echo "shared=${{ github.workspace }}/build${{ runner.os == 'Linux' && '/libc7zip.so' || '\Release\c7zip.dll' }}" >> "$GITHUB_OUTPUT"
+        echo "upload=${{ runner.temp }}/upload/${{ runner.os }}_${{ matrix.arch }}" >> "$GITHUB_OUTPUT"
         
     - name: Install packages (Linux)
       if: runner.os == 'Linux'
@@ -98,14 +99,9 @@ jobs:
       # Use context variable ${{ env.VARIABLE }} or specify `shell: bash` or 
       # `shell:pwsh` explicitly
       run: |
-        mkdir ${{ runner.temp }}/upload
-        mkdir ${{ runner.temp }}/upload/bin
-        cp ${{ steps.strings.outputs.exe }} ${{ runner.temp }}/upload/bin
-        mkdir ${{ runner.temp }}/upload/lib
-        cp ${{ steps.strings.outputs.shared }} ${{ runner.temp }}/upload/lib
-        cp -r ${{ github.workspace }}/include ${{ runner.temp }}/upload
-        cp ${{ github.workspace }}/LICENSE ${{ runner.temp }}/upload
-        cp ${{ github.workspace }}/README.md ${{ runner.temp }}/upload
+        mkdir -p ${{ steps.strings.outputs.upload }}
+        cp ${{ steps.strings.outputs.exe }} ${{ steps.strings.outputs.upload }}
+        cp ${{ steps.strings.outputs.shared }} ${{ steps.strings.outputs.upload }}
         
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
